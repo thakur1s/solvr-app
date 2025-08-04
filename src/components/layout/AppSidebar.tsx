@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navigationItems = [
   {
@@ -66,6 +68,22 @@ export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
+  const { user, profile } = useAuth();
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const getDisplayName = () => {
+    if (profile?.display_name) return profile.display_name;
+    if (user?.email) return user.email.split('@')[0];
+    return 'User';
+  };
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -167,14 +185,17 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t">
-        {!collapsed && (
+        {!collapsed && user && (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center">
-              <span className="text-white text-sm font-medium">JD</span>
-            </div>
+            <Avatar className="w-8 h-8">
+              <AvatarImage src={profile?.avatar_url || ''} />
+              <AvatarFallback>
+                {profile?.display_name ? getInitials(profile.display_name) : getInitials(getDisplayName())}
+              </AvatarFallback>
+            </Avatar>
             <div className="flex-1">
-              <p className="text-sm font-medium">John Doe</p>
-              <p className="text-xs text-muted-foreground">john@company.com</p>
+              <p className="text-sm font-medium">{getDisplayName()}</p>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
             </div>
           </div>
         )}

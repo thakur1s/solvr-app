@@ -12,6 +12,7 @@ import {
   Plus,
   ArrowRight,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const stats = [
   {
@@ -111,6 +112,13 @@ const activeProjects = [
 ];
 
 export default function Dashboard() {
+  const { user, profile } = useAuth();
+  
+  const getDisplayName = () => {
+    if (profile?.display_name) return profile.display_name;
+    if (user?.email) return user.email.split('@')[0];
+    return 'User';
+  };
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       todo: { label: "To Do", className: "status-todo" },
@@ -156,7 +164,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Good morning, John! 👋</h1>
+          <h1 className="text-3xl font-bold">Good morning, {getDisplayName()}! 👋</h1>
           <p className="text-muted-foreground mt-1">
             Here's what's happening with your projects today.
           </p>
