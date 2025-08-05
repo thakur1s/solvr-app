@@ -20,115 +20,18 @@ import {
   MoreHorizontal,
   FolderKanban,
 } from "lucide-react";
-
-const projects = [
-  {
-    id: 1,
-    name: "Website Redesign",
-    description: "Complete overhaul of company website with modern design and improved UX",
-    status: "active",
-    priority: "high",
-    progress: 75,
-    tasks: { completed: 15, total: 20 },
-    team: [
-      { name: "Sarah Chen", avatar: "SC" },
-      { name: "Mike Johnson", avatar: "MJ" },
-      { name: "Lisa Wang", avatar: "LW" },
-    ],
-    dueDate: "Dec 15, 2024",
-    category: "Design",
-    budget: "$45,000",
-  },
-  {
-    id: 2,
-    name: "Mobile App Development",
-    description: "iOS and Android app for customer engagement and sales",
-    status: "active",
-    priority: "high",
-    progress: 45,
-    tasks: { completed: 9, total: 20 },
-    team: [
-      { name: "Mike Johnson", avatar: "MJ" },
-      { name: "Alex Rodriguez", avatar: "AR" },
-      { name: "Sarah Chen", avatar: "SC" },
-    ],
-    dueDate: "Jan 30, 2025",
-    category: "Development",
-    budget: "$120,000",
-  },
-  {
-    id: 3,
-    name: "Marketing Campaign Q4",
-    description: "Holiday season marketing push across all channels",
-    status: "active",
-    priority: "medium",
-    progress: 90,
-    tasks: { completed: 18, total: 20 },
-    team: [
-      { name: "Lisa Wang", avatar: "LW" },
-      { name: "Sarah Chen", avatar: "SC" },
-    ],
-    dueDate: "Dec 5, 2024",
-    category: "Marketing",
-    budget: "$25,000",
-  },
-  {
-    id: 4,
-    name: "Backend Infrastructure",
-    description: "Scalability improvements and performance optimization",
-    status: "planning",
-    priority: "medium",
-    progress: 20,
-    tasks: { completed: 4, total: 20 },
-    team: [
-      { name: "Alex Rodriguez", avatar: "AR" },
-      { name: "Mike Johnson", avatar: "MJ" },
-    ],
-    dueDate: "Feb 15, 2025",
-    category: "Development",
-    budget: "$80,000",
-  },
-  {
-    id: 5,
-    name: "Customer Support Portal",
-    description: "Self-service portal for customer support and documentation",
-    status: "completed",
-    priority: "low",
-    progress: 100,
-    tasks: { completed: 12, total: 12 },
-    team: [
-      { name: "Lisa Wang", avatar: "LW" },
-      { name: "Sarah Chen", avatar: "SC" },
-    ],
-    dueDate: "Nov 30, 2024",
-    category: "Support",
-    budget: "$35,000",
-  },
-  {
-    id: 6,
-    name: "Data Analytics Dashboard",
-    description: "Real-time analytics and reporting dashboard for executives",
-    status: "on-hold",
-    priority: "low",
-    progress: 10,
-    tasks: { completed: 2, total: 20 },
-    team: [
-      { name: "Alex Rodriguez", avatar: "AR" },
-    ],
-    dueDate: "TBD",
-    category: "Analytics",
-    budget: "$60,000",
-  },
-];
+import { useProjects } from '@/hooks/useProjects';
+import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 
 export default function Projects() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const { projects, loading } = useProjects();
 
   const filteredProjects = projects.filter((project) => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         (project.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || project.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || project.priority === priorityFilter;
     
@@ -137,10 +40,10 @@ export default function Projects() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      active: { label: "Active", className: "bg-success/10 text-success border-success/20" },
+      in_progress: { label: "In Progress", className: "bg-success/10 text-success border-success/20" },
       planning: { label: "Planning", className: "bg-warning/10 text-warning border-warning/20" },
       completed: { label: "Completed", className: "bg-primary/10 text-primary border-primary/20" },
-      "on-hold": { label: "On Hold", className: "bg-muted text-muted-foreground border-muted" },
+      "on_hold": { label: "On Hold", className: "bg-muted text-muted-foreground border-muted" },
     };
     
     const config = statusConfig[status as keyof typeof statusConfig];
@@ -176,10 +79,7 @@ export default function Projects() {
             Manage and track all your team's projects in one place.
           </p>
         </div>
-        <Button className="btn-gradient">
-          <Plus className="h-4 w-4 mr-2" />
-          New Project
-        </Button>
+        <CreateProjectDialog />
       </div>
 
       {/* Filters */}
@@ -202,10 +102,10 @@ export default function Projects() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
                 <SelectItem value="planning">Planning</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="on-hold">On Hold</SelectItem>
+                <SelectItem value="on_hold">On Hold</SelectItem>
               </SelectContent>
             </Select>
 
@@ -215,6 +115,7 @@ export default function Projects() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Priority</SelectItem>
+                <SelectItem value="urgent">Urgent</SelectItem>
                 <SelectItem value="high">High</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="low">Low</SelectItem>
@@ -229,9 +130,27 @@ export default function Projects() {
         </CardContent>
       </Card>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="card-elevated">
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
+                  <div className="h-2 bg-muted rounded"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
       {/* Projects Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredProjects.map((project, index) => (
+      {!loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredProjects.map((project, index) => (
           <Card key={project.id} className="card-elevated animate-slideInLeft" style={{animationDelay: `${index * 0.1}s`}}>
             <CardHeader className="pb-4">
               <div className="flex items-start justify-between">
@@ -262,7 +181,7 @@ export default function Projects() {
                 </div>
                 <Progress value={project.progress} className="h-2" />
                 <div className="text-xs text-muted-foreground">
-                  {project.tasks.completed} of {project.tasks.total} tasks completed
+                  Progress: {project.progress}%
                 </div>
               </div>
 
@@ -270,18 +189,12 @@ export default function Projects() {
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
                 <div className="flex -space-x-1">
-                  {project.team.map((member, idx) => (
-                    <div
-                      key={idx}
-                      className="w-6 h-6 rounded-full bg-gradient-primary flex items-center justify-center text-white text-xs font-medium border-2 border-background"
-                      title={member.name}
-                    >
-                      {member.avatar}
-                    </div>
-                  ))}
+                  <div className="w-6 h-6 rounded-full bg-gradient-primary flex items-center justify-center text-white text-xs font-medium border-2 border-background">
+                    U
+                  </div>
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  {project.team.length} member{project.team.length !== 1 ? 's' : ''}
+                  Team members
                 </span>
               </div>
 
@@ -289,10 +202,10 @@ export default function Projects() {
               <div className="flex items-center justify-between pt-2 border-t">
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
-                  <span>{project.dueDate}</span>
+                  <span>{project.due_date ? new Date(project.due_date).toLocaleDateString() : 'No due date'}</span>
                 </div>
                 <div className="text-sm font-medium text-foreground">
-                  {project.budget}
+                  {project.budget ? `$${project.budget.toLocaleString()}` : 'No budget'}
                 </div>
               </div>
 
@@ -302,12 +215,13 @@ export default function Projects() {
                 View Project
               </Button>
             </CardContent>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Empty State */}
-      {filteredProjects.length === 0 && (
+      {!loading && filteredProjects.length === 0 && (
         <Card className="card-elevated">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <FolderKanban className="h-12 w-12 text-muted-foreground mb-4" />
@@ -315,10 +229,7 @@ export default function Projects() {
             <p className="text-muted-foreground text-center mb-4">
               Try adjusting your search or filters, or create a new project.
             </p>
-            <Button className="btn-gradient">
-              <Plus className="h-4 w-4 mr-2" />
-              Create Project
-            </Button>
+            <CreateProjectDialog />
           </CardContent>
         </Card>
       )}
