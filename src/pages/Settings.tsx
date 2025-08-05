@@ -291,7 +291,7 @@ export default function Settings() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Button variant="outline" className="w-full" type="button">
-            Two-Factor Authentication
+            Two-Factor Authentication (Coming Soon)
           </Button>
           
           <Separator />
