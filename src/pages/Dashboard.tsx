@@ -13,6 +13,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
+import { CreateTaskDialog } from "@/components/tasks/CreateTaskDialog";
 
 const stats = [
   {
@@ -119,6 +121,13 @@ export default function Dashboard() {
     if (user?.email) return user.email.split('@')[0];
     return 'User';
   };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       todo: { label: "To Do", className: "status-todo" },
@@ -164,15 +173,12 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Good morning, {getDisplayName()}! 👋</h1>
+          <h1 className="text-3xl font-bold">{getGreeting()}, {getDisplayName()}! 👋</h1>
           <p className="text-muted-foreground mt-1">
             Here's what's happening with your projects today.
           </p>
         </div>
-        <Button className="btn-gradient">
-          <Plus className="h-4 w-4 mr-2" />
-          New Project
-        </Button>
+        <CreateProjectDialog />
       </div>
 
       {/* Stats Grid */}
@@ -296,14 +302,8 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-auto p-4 flex flex-col gap-2">
-              <Plus className="h-6 w-6" />
-              <span className="text-sm">New Task</span>
-            </Button>
-            <Button variant="outline" className="h-auto p-4 flex flex-col gap-2">
-              <FolderKanban className="h-6 w-6" />
-              <span className="text-sm">New Project</span>
-            </Button>
+            <CreateTaskDialog />
+            <CreateProjectDialog />
             <Button variant="outline" className="h-auto p-4 flex flex-col gap-2">
               <Users className="h-6 w-6" />
               <span className="text-sm">Invite Team</span>

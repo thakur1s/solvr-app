@@ -25,7 +25,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
-  updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>;
+  updateProfile: (updates: Partial<Profile>, showProfileToast?: boolean) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -178,7 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateProfile = async (updates: Partial<Profile>) => {
+  const updateProfile = async (updates: Partial<Profile>, showProfileToast = true) => {
     if (!user) return { error: new Error('No user logged in') };
 
     try {
@@ -192,10 +192,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Update local profile state
       setProfile(prev => prev ? { ...prev, ...updates } : null);
 
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
-      });
+      // Only show profile updated toast if it's actual profile data (not just settings)
+      const isProfileDataUpdate = updates.bio !== undefined || updates.display_name !== undefined || updates.avatar_url !== undefined;
+      
+      if (showProfileToast && isProfileDataUpdate) {
+        toast({
+          title: "Profile updated",
+          description: "Your profile has been successfully updated.",
+        });
+      } else if (showProfileToast && !isProfileDataUpdate) {
+        toast({
+          title: "Settings updated",
+          description: "Your preferences have been saved.",
+        });
+      }
 
       return { error: null };
     } catch (error) {

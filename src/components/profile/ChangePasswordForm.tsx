@@ -45,6 +45,22 @@ export function ChangePasswordForm() {
   const onSubmit = async (values: PasswordFormValues) => {
     setLoading(true);
     try {
+      // Get current user email first
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user?.email) {
+        throw new Error('Unable to verify current user');
+      }
+
+      // First verify current password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: userData.user.email,
+        password: values.currentPassword
+      });
+
+      if (signInError) {
+        throw new Error('Current password is incorrect');
+      }
+
       const { error } = await supabase.auth.updateUser({
         password: values.newPassword
       });

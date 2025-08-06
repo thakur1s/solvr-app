@@ -44,7 +44,15 @@ export default function Settings() {
   const onSubmit = async (values: NotificationFormValues) => {
     setLoading(true);
     try {
+      // Check if any actual profile data has changed (not just settings)
+      const hasProfileChanges = values.bio !== (profile?.bio || '');
+      
       await updateProfile(values);
+      
+      // Only show "Profile updated" if bio changed, otherwise just show settings updated
+      if (hasProfileChanges) {
+        // Profile updated message is handled in AuthContext
+      }
     } finally {
       setLoading(false);
     }

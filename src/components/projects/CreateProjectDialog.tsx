@@ -5,8 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Plus } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon, Plus } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { useProjects } from '@/hooks/useProjects';
+import { toast } from 'sonner';
 
 export const CreateProjectDialog = () => {
   const [open, setOpen] = useState(false);
@@ -17,22 +22,34 @@ export const CreateProjectDialog = () => {
     priority: 'medium' as const,
     progress: 0,
     budget: '',
-    start_date: '',
-    due_date: ''
+    start_date: undefined as Date | undefined,
+    due_date: undefined as Date | undefined
   });
   const [loading, setLoading] = useState(false);
   const { createProject } = useProjects();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation
+    if (!formData.start_date || !formData.due_date) {
+      toast.error('Both start date and due date are required');
+      return;
+    }
+    
+    if (formData.start_date > formData.due_date) {
+      toast.error('Start date cannot be after due date');
+      return;
+    }
+    
     setLoading(true);
 
     try {
       const projectData = {
         ...formData,
         budget: formData.budget ? parseFloat(formData.budget) : undefined,
-        start_date: formData.start_date || undefined,
-        due_date: formData.due_date || undefined,
+        start_date: format(formData.start_date, 'yyyy-MM-dd'),
+        due_date: format(formData.due_date, 'yyyy-MM-dd'),
       };
 
       await createProject(projectData);
@@ -44,8 +61,8 @@ export const CreateProjectDialog = () => {
         priority: 'medium',
         progress: 0,
         budget: '',
-        start_date: '',
-        due_date: ''
+        start_date: undefined,
+        due_date: undefined
       });
     } catch (error) {
       // Error handled in hook
@@ -127,23 +144,57 @@ export const CreateProjectDialog = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="start_date">Start Date</Label>
-              <Input
-                id="start_date"
-                type="date"
-                value={formData.start_date}
-                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-              />
+              <Label htmlFor="start_date">Start Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.start_date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.start_date ? format(formData.start_date, "PPP") : "Pick start date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.start_date}
+                    onSelect={(date) => setFormData({ ...formData, start_date: date })}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div>
-              <Label htmlFor="due_date">Due Date</Label>
-              <Input
-                id="due_date"
-                type="date"
-                value={formData.due_date}
-                onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-              />
+              <Label htmlFor="due_date">Due Date *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.due_date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.due_date ? format(formData.due_date, "PPP") : "Pick due date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.due_date}
+                    onSelect={(date) => setFormData({ ...formData, due_date: date })}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
