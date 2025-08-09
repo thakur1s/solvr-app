@@ -297,6 +297,18 @@ export type Database = {
         Args: { username: string }
         Returns: boolean
       }
+      is_project_member: {
+        Args: { project_uuid: string }
+        Returns: boolean
+      }
+      is_project_owner: {
+        Args: { project_uuid: string }
+        Returns: boolean
+      }
+      is_project_owner_or_admin: {
+        Args: { project_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

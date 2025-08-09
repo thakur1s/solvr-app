@@ -22,6 +22,7 @@ import {
   MoreHorizontal,
   UserPlus,
 } from "lucide-react";
+import { InviteMemberDialog } from "@/components/team/InviteMemberDialog";
 
 const teamMembers = [
   {
@@ -164,10 +165,7 @@ export default function Team() {
             Manage your team members and their projects.
           </p>
         </div>
-        <Button className="btn-gradient">
-          <UserPlus className="h-4 w-4 mr-2" />
-          Invite Member
-        </Button>
+        <InviteMemberDialog />
       </div>
 
       {/* Team Stats */}
@@ -364,10 +362,7 @@ export default function Team() {
             <p className="text-muted-foreground text-center mb-4">
               Try adjusting your search or filters, or invite new team members.
             </p>
-            <Button className="btn-gradient">
-              <UserPlus className="h-4 w-4 mr-2" />
-              Invite Team Member
-            </Button>
+            <InviteMemberDialog />
           </CardContent>
         </Card>
       )}

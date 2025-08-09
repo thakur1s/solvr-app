@@ -14,11 +14,10 @@ import { Bell, Search, User, LogOut, Settings, UserCircle, Plus } from "lucide-r
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Link, useNavigate } from "react-router-dom";
-import { useNotifications } from "@/hooks/useNotifications";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 export function TopBar() {
   const { user, profile, signOut } = useAuth();
-  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -64,14 +63,7 @@ export function TopBar() {
             New Task
           </Button>
           
-          <Button variant="ghost" size="sm" className="relative">
-            <Bell className="h-4 w-4" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </Button>
+          <NotificationCenter />
           
           <ThemeToggle />
           
